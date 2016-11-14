@@ -23,7 +23,7 @@ var (
 	skipto   int
 	livename string
 	livecell []byte
-	dingbats map[string]string
+	icon     map[string]string
 )
 
 // Field represents a two-dimensional field of cells.
@@ -157,9 +157,9 @@ func initSeed() {
 }
 
 func initDisplay() {
-	ding, ok := dingbats[livename]
+	ding, ok := icon[livename]
 	if !ok {
-		ding = dingbats["whitedot"]
+		ding = icon["whitedot"]
 	}
 	livecell = []byte(" " + ding)
 }
@@ -180,7 +180,7 @@ func parseflags() (width, height, perSec int) {
 	flag.IntVar(&width, "w", 30, "width of simulation field")
 	flag.IntVar(&gens, "n", 20, "display up to `N` generations")
 	flag.IntVar(&skipto, "from", 0, "display from generation `N`")
-	flag.StringVar(&livename, "live", "", "`name` of dingbat used to depict a live cell (default whitedot)")
+	flag.StringVar(&livename, "icon", "", "`name` of icon to use for live cells (default whitedot)")
 
 	flag.Parse()
 
@@ -193,45 +193,45 @@ func parseflags() (width, height, perSec int) {
 
 func addUsageInfo() {
 
-	dingbats = make(map[string]string)
-	dingbats["aster-1"] = "\u2731"
-	dingbats["aster-2"] = "\u2749"
-	dingbats["bug"] = "\u2603"
-	dingbats["circle-x"] = "\u2A02"
-	dingbats["dot-star"] = "\u272A"
-	dingbats["fat-x"] = "\u2716"
-	dingbats["green-x"] = "\u274E"
-	dingbats["man-dribble"] = "\u26F9"
-	dingbats["man-yellow"] = "\u26B1"
-	dingbats["no-entry"] = "\u26D4"
-	dingbats["redhat"] = "\u26D1"
-	dingbats["skull-x"] = "\u2620"
-	dingbats["snowman"] = "\u26C4"
-	dingbats["star"] = "\u2606"
-	dingbats["whitedot"] = "\u26AA"
+	icon = make(map[string]string)
+	icon["aster-1"] = "\u2731"
+	icon["aster-2"] = "\u2749"
+	icon["bug"] = "\u2603"
+	icon["circle-x"] = "\u2A02"
+	icon["dot-star"] = "\u272A"
+	icon["fat-x"] = "\u2716"
+	icon["green-x"] = "\u274E"
+	icon["man-dribble"] = "\u26F9"
+	icon["man-yellow"] = "\u26B1"
+	icon["no-entry"] = "\u26D4"
+	icon["redhat"] = "\u26D1"
+	icon["skull-x"] = "\u2620"
+	icon["snowman"] = "\u26C4"
+	icon["star"] = "\u2606"
+	icon["whitedot"] = "\u26AA"
 
 	defaultUsage := flag.Usage
 	flag.Usage = func() {
 		defaultUsage()
 		fmt.Fprintf(os.Stderr,
-			"\nAvailable dingbats for live cells:\n\n"+
-				"Name    \tCell\tDescription\n"+
-				"--------\t-----\t-----------\n"+
-				"aster-1 \t"+dingbats["aster-1"]+"\tAsterisk 1\n"+
-				"aster-2 \t"+dingbats["aster-2"]+"\tAsterisk 2\n"+
-				"bug     \t"+dingbats["bug"]+"\tBug\n"+
-				"circle-x\t"+dingbats["circle-x"]+"\tCircle with an X\n"+
-				"dot-star\t"+dingbats["dot-star"]+"\tDot with star\n"+
-				"fat-x   \t"+dingbats["fat-x"]+"\tFat white X\n"+
-				"green-x \t"+dingbats["green-x"]+"\tGreen square with white X\n"+
-				"man-dribble\t"+dingbats["man-dribble"]+"\tMan dribbling ball\n"+
-				"man-yellow\t"+dingbats["man-yellow"]+"\tLittle yellow man\n"+
-				"no-entry\t"+dingbats["no-entry"]+"\tNo entry sign\n"+
-				"redhat  \t"+dingbats["redhat"]+"\tRed hardhat with white cross\n"+
-				"skull-x \t"+dingbats["skull-x"]+"\tSkull and crossbones\n"+
-				"snowman \t"+dingbats["snowman"]+"\tSnowman\n"+
-				"star    \t"+dingbats["star"]+"\tStar\n"+
-				"whitedot\t"+dingbats["whitedot"]+"\tWhite dot (default)\n",
+			"\nAvailable icons for live cells:\n\n"+
+				"Icon\tName\t\tDescription\n"+
+				"----\t--------\t-----------\n"+
+				icon["aster-1"]+"\taster-1\t\tAsterisk 1\n"+
+				icon["aster-2"]+"\taster-2\t\tAsterisk 2\n"+
+				icon["bug"]+"\tbug\t\tBug\n"+
+				icon["circle-x"]+"\tcircle-x\tCircle with an X\n"+
+				icon["dot-star"]+"\tdot-star\tDot with star\n"+
+				icon["fat-x"]+"\tfat-x\t\tFat white X\n"+
+				icon["green-x"]+"\tgreen-x\t\tGreen square with white X\n"+
+				icon["man-dribble"]+"\tmad-dribble\tMan dribbling ball\n"+
+				icon["man-yellow"]+"\tman-yellow\tLittle yellow man\n"+
+				icon["no-entry"]+"\tno-entry\tNo entry sign\n"+
+				icon["redhat"]+"\tredhat\t\tRed hardhat with white cross\n"+
+				icon["skull-x"]+"\tskull-x\t\tSkull and crossbones\n"+
+				icon["snowman"]+"\tsnowman\t\tSnowman\n"+
+				icon["star"]+"\tstar\t\tStar\n"+
+				icon["whitedot"]+"\twhitedot\tWhite dot (default)\n",
 		)
 	}
 }
