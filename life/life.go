@@ -20,8 +20,8 @@ const (
 var (
 	seed     int64
 	gens     int
-	skipto   int
-	livename string
+	startGen int
+	iconName string
 	livecell []byte
 	icon     map[string]string
 )
@@ -125,28 +125,37 @@ func (l *Life) String() string {
 }
 
 func (l *Life) showGeneration(nth int) {
-	fmt.Printf("\n\nGeneration %v (%v of %v):\n\n%v", l.g, nth-skipto, gens, l)
+	fmt.Printf("\n\nGeneration %v (%v of %v):\n\n%v", l.g, nth-startGen+1, gens, l)
+}
+
+func (l *Life) showSummary() {
+	fmt.Printf("%v generations calculated.\n\n", l.g)
+	fmt.Printf("To continue: %v -y %v -x %v -seed %v -icon %v -s %v -n %v\n", os.Args[0],
+		l.h, l.w, seed, iconName, l.g, gens,
+	)
 }
 
 func (l *Life) simulate(gens int, delay time.Duration) {
 
 	fmt.Printf("\nConway's Game of Life\n")
 
-	if skipto != 0 {
-		fmt.Printf("\nStarting from generation %v...", skipto)
+	if startGen > 1 {
+		fmt.Printf("\nStarting from generation %v...", startGen)
+		startGen--
+	} else {
+		startGen = 0
 	}
 
-	maxgen := gens + skipto
-	skipto--
+	maxgen := gens + startGen
 	for i := 0; i < maxgen; i++ {
 		l.step()
-		if skipto <= i {
+		if startGen <= i {
 			l.showGeneration(i)
 			time.Sleep(delay)
 		}
 	}
 
-	fmt.Printf("%v generations, %v x %v grid, seed=%v\n\n", l.g, l.h, l.w, seed)
+	l.showSummary()
 }
 
 func initSeed() {
@@ -157,16 +166,17 @@ func initSeed() {
 }
 
 func initDisplay() {
-	ding, ok := icon[livename]
+	ding, ok := icon[iconName]
 	if !ok {
-		ding = icon["whitedot"]
+		iconName = "blue-circle"
+		ding = icon[iconName]
 	}
 	livecell = []byte(" " + ding)
 }
 
-func checkSkipping() {
-	if skipto < 0 {
-		skipto = 0
+func checkStartGeneration() {
+	if startGen < 0 {
+		startGen = 0
 	}
 }
 
@@ -179,14 +189,14 @@ func parseflags() (width, height, stepsPerSecond int) {
 	flag.IntVar(&width, "x", 30, "width of simulation field")
 	flag.IntVar(&gens, "n", 20, "display up to `N` generations")
 	flag.IntVar(&stepsPerSecond, "r", 5, "display `N` generations per second")
-	flag.IntVar(&skipto, "s", 0, "start displaying from generation `N`")
-	flag.StringVar(&livename, "icon", "", "`name` of icon to use for live cells (default whitedot)")
+	flag.IntVar(&startGen, "s", 0, "start displaying from generation `N`")
+	flag.StringVar(&iconName, "icon", "", "`name` of icon to use for live cells (default blue-circle)")
 
 	flag.Parse()
 
 	initSeed()
 	initDisplay()
-	checkSkipping()
+	checkStartGeneration()
 
 	return
 }
@@ -196,18 +206,27 @@ func usage() {
 	icon = make(map[string]string)
 	icon["aster-1"] = "\u2731"
 	icon["aster-2"] = "\u2749"
+	icon["blue-circle"] = "\u23FA"
+	icon["blue-square"] = "\u23F9"
 	icon["bug"] = "\u2603"
+	icon["circle-plus"] = "\u2A01"
 	icon["circle-x"] = "\u2A02"
 	icon["dot-star"] = "\u272A"
 	icon["fat-x"] = "\u2716"
+	icon["flower"] = "\u273F"
 	icon["green-x"] = "\u274E"
 	icon["man-dribble"] = "\u26F9"
 	icon["man-yellow"] = "\u26B1"
 	icon["no-entry"] = "\u26D4"
 	icon["redhat"] = "\u26D1"
 	icon["skull-x"] = "\u2620"
+	icon["snowflake"] = "\u274A"
 	icon["snowman"] = "\u26C4"
-	icon["star"] = "\u2606"
+	icon["square-big"] = "\u2B1C"
+	icon["square-small"] = "\u25A9"
+	icon["star"] = "\u2605"
+	icon["star-6pt"] = "\u2736"
+	icon["star-8pt"] = "\u2738"
 	icon["whitedot"] = "\u26AA"
 
 	flag.Usage = func() {
@@ -220,19 +239,28 @@ func usage() {
 				"----\t--------\t-----------\n"+
 				icon["aster-1"]+"\taster-1\t\tAsterisk 1\n"+
 				icon["aster-2"]+"\taster-2\t\tAsterisk 2\n"+
+				icon["blue-circle"]+"\tblue-circle\tBlue tile, white circle (default)\n"+
+				icon["blue-square"]+"\tblue-square\tBlue tile, white square\n"+
 				icon["bug"]+"\tbug\t\tBug\n"+
-				icon["circle-x"]+"\tcircle-x\tCircle with an X\n"+
+				icon["circle-plus"]+"\tcircle-plus\tCircle with a '+'\n"+
+				icon["circle-x"]+"\tcircle-x\tCircle with an 'x'\n"+
 				icon["dot-star"]+"\tdot-star\tDot with star\n"+
 				icon["fat-x"]+"\tfat-x\t\tFat white X\n"+
-				icon["green-x"]+"\tgreen-x\t\tGreen square with white X\n"+
+				icon["flower"]+"\tflower\t\tFlower\n"+
+				icon["green-x"]+"\tgreen-x\t\tGreen tile with white X\n"+
 				icon["man-dribble"]+"\tman-dribble\tMan dribbling ball\n"+
 				icon["man-yellow"]+"\tman-yellow\tLittle yellow man\n"+
 				icon["no-entry"]+"\tno-entry\tNo entry sign\n"+
 				icon["redhat"]+"\tredhat\t\tRed hardhat with white cross\n"+
 				icon["skull-x"]+"\tskull-x\t\tSkull and crossbones\n"+
+				icon["snowflake"]+"\tsnowflake\tSnowflake\n"+
 				icon["snowman"]+"\tsnowman\t\tSnowman\n"+
-				icon["star"]+"\tstar\t\tStar\n"+
-				icon["whitedot"]+"\twhitedot\tWhite dot (default)\n",
+				icon["square-big"]+"\tsquare-big\tBig square\n"+
+				icon["square-small"]+"\tsquare-small\tSmall square\n"+
+				icon["star"]+"\tstar\t\t5-point star\n"+
+				icon["star-6pt"]+"\tstar-6pt\t6-point star\n"+
+				icon["star-8pt"]+"\tstar-8pt\t8-point star\n"+
+				icon["whitedot"]+"\twhitedot\tWhite dot\n",
 		)
 	}
 }
