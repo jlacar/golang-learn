@@ -192,9 +192,6 @@ func parseflags() (width, height, perSec int) {
 }
 
 func addUsageInfo() {
-	// \u263A smile-white
-	// \u263B smile-black
-	// \u26AA dot-white
 
 	dingbats = make(map[string]string)
 	dingbats["aster-1"] = "\u2731"
@@ -218,23 +215,23 @@ func addUsageInfo() {
 		defaultUsage()
 		fmt.Fprintf(os.Stderr,
 			"\nAvailable dingbats for live cells:\n\n"+
-				"Name    \tDescription\n"+
-				"--------\t-----------\n"+
-				"aster-1 \tAsterisk 1\n"+
-				"aster-2 \tAsterisk 2\n"+
-				"bug     \tBug\n"+
-				"circle-x\tWhite circle with an X\n"+
-				"dot-star\tDot with star\n"+
-				"fat-x   \tFat white X\n"+
-				"green-x \tGreen square with white X\n"+
-				"man-dribble\tLittle dribbling man\n"+
-				"man-yellow\tLittle yellow man\n"+
-				"no-entry\tRed no entry sign\n"+
-				"redhat  \tRed hardhat with white cross\n"+
-				"skull-x \tSkull and crossbones\n"+
-				"snowman \tSnowman\n"+
-				"star    \tWhite star\n"+
-				"whitedot\tWhite dot (default)\n",
+				"Name    \tCell\tDescription\n"+
+				"--------\t-----\t-----------\n"+
+				"aster-1 \t"+dingbats["aster-1"]+"\tAsterisk 1\n"+
+				"aster-2 \t"+dingbats["aster-2"]+"\tAsterisk 2\n"+
+				"bug     \t"+dingbats["bug"]+"\tBug\n"+
+				"circle-x\t"+dingbats["circle-x"]+"\tCircle with an X\n"+
+				"dot-star\t"+dingbats["dot-star"]+"\tDot with star\n"+
+				"fat-x   \t"+dingbats["fat-x"]+"\tFat white X\n"+
+				"green-x \t"+dingbats["green-x"]+"\tGreen square with white X\n"+
+				"man-dribble\t"+dingbats["man-dribble"]+"\tMan dribbling ball\n"+
+				"man-yellow\t"+dingbats["man-yellow"]+"\tLittle yellow man\n"+
+				"no-entry\t"+dingbats["no-entry"]+"\tNo entry sign\n"+
+				"redhat  \t"+dingbats["redhat"]+"\tRed hardhat with white cross\n"+
+				"skull-x \t"+dingbats["skull-x"]+"\tSkull and crossbones\n"+
+				"snowman \t"+dingbats["snowman"]+"\tSnowman\n"+
+				"star    \t"+dingbats["star"]+"\tStar\n"+
+				"whitedot\t"+dingbats["whitedot"]+"\tWhite dot (default)\n",
 		)
 	}
 }
