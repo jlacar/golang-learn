@@ -195,8 +195,6 @@ func addUsageInfo() {
 	// \u263A smile-white
 	// \u263B smile-black
 	// \u26AA dot-white
-	// \u26B1 little-man
-	// \u26F9 man-dribble
 
 	dingbats = make(map[string]string)
 	dingbats["aster-1"] = "\u2731"
@@ -206,7 +204,8 @@ func addUsageInfo() {
 	dingbats["dot-star"] = "\u272A"
 	dingbats["fat-x"] = "\u2716"
 	dingbats["green-x"] = "\u274E"
-	dingbats["little-man"] = "\u26B1"
+	dingbats["man-dribble"] = "\u26F9"
+	dingbats["man-yellow"] = "\u26B1"
 	dingbats["no-entry"] = "\u26D4"
 	dingbats["redhat"] = "\u26D1"
 	dingbats["skull-x"] = "\u2620"
@@ -228,7 +227,8 @@ func addUsageInfo() {
 				"dot-star\tDot with star\n"+
 				"fat-x   \tFat white X\n"+
 				"green-x \tGreen square with white X\n"+
-				"little-man\tLittle yellow man\n"+
+				"man-dribble\tLittle dribbling man\n"+
+				"man-yellow\tLittle yellow man\n"+
 				"no-entry\tRed no entry sign\n"+
 				"redhat  \tRed hardhat with white cross\n"+
 				"skull-x \tSkull and crossbones\n"+
