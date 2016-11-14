@@ -170,16 +170,16 @@ func checkSkipping() {
 	}
 }
 
-func parseflags() (width, height, perSec int) {
+func parseflags() (width, height, stepsPerSecond int) {
 
 	flag.Int64Var(&seed, "seed", 0,
 		"seed for initial population (default random)")
 
-	flag.IntVar(&perSec, "d", 5, "delay 1/`N` seconds between generations")
-	flag.IntVar(&height, "h", 30, "height of simulation field")
-	flag.IntVar(&width, "w", 30, "width of simulation field")
+	flag.IntVar(&height, "y", 30, "height of simulation field")
+	flag.IntVar(&width, "x", 30, "width of simulation field")
 	flag.IntVar(&gens, "n", 20, "display up to `N` generations")
-	flag.IntVar(&skipto, "from", 0, "display from generation `N`")
+	flag.IntVar(&stepsPerSecond, "r", 5, "display `N` generations per second")
+	flag.IntVar(&skipto, "s", 0, "start displaying from generation `N`")
 	flag.StringVar(&livename, "icon", "", "`name` of icon to use for live cells (default whitedot)")
 
 	flag.Parse()
@@ -191,7 +191,7 @@ func parseflags() (width, height, perSec int) {
 	return
 }
 
-func addUsageInfo() {
+func usage() {
 
 	icon = make(map[string]string)
 	icon["aster-1"] = "\u2731"
@@ -210,9 +210,10 @@ func addUsageInfo() {
 	icon["star"] = "\u2606"
 	icon["whitedot"] = "\u26AA"
 
-	defaultUsage := flag.Usage
 	flag.Usage = func() {
-		defaultUsage()
+		fmt.Fprintf(os.Stderr, "Usage: %s [-x] [-y] [-r] [-n] [-s] [-seed] [-icon]\n\nOptions:\n\n",
+			os.Args[0])
+		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr,
 			"\nAvailable icons for live cells:\n\n"+
 				"Icon\tName\t\tDescription\n"+
@@ -238,12 +239,12 @@ func addUsageInfo() {
 
 func main() {
 
-	addUsageInfo()
+	usage()
 
-	width, height, perSec := parseflags()
+	width, height, stepsPerSecond := parseflags()
 
 	NewLife(width, height).simulate(
 		gens,
-		time.Second/time.Duration(perSec),
+		time.Second/time.Duration(stepsPerSecond),
 	)
 }
