@@ -1,14 +1,48 @@
-// An implementation of Conway's Game of Life.
+// My mods to the Go implementation of Conway's Game of Life.
+//
+// based on https://golang.org/doc/play/life.go
+//
 package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"math/rand"
-//	"os"
-//	"strconv"
+	"os"
 	"time"
-	"flag"
+)
+
+const (
+	deadcell = "  "
+	// \u263A smile-white
+	// \u263B smile-black
+	// \u26AA dot-white
+	// \u26B1 little-man
+	// \u26F9 man-dribble
+
+	liveAster1   = " \u2731"
+	liveAster2   = " \u2749"
+	liveBug      = " \u2603"
+	liveCircleX  = " \u2A02"
+	liveDotStar  = " \u272A"
+	liveFatX     = " \u2716"
+	liveGreenX   = " \u274E"
+	liveLilman   = " \u26B1"
+	liveNoEntry  = " \u26D4"
+	liveRedHat   = " \u26D1"
+	liveSkullX   = " \u2620"
+	liveSnowman  = " \u26C4"
+	liveStar     = " \u2606"
+	liveWhiteDot = " \u26AA"
+)
+
+var (
+	seed     int64
+	gens     int
+	skipto   int
+	livename string
+	livecell []byte
 )
 
 // Field represents a two-dimensional field of cells.
@@ -62,9 +96,8 @@ func (f *Field) Next(x, y int) bool {
 
 // Life stores the state of a round of Conway's Game of Life.
 type Life struct {
-	a, b *Field
+	a, b    *Field
 	w, h, g int
-	
 }
 
 // NewLife returns a new Life game state with a random initial state.
@@ -90,8 +123,8 @@ func (l *Life) step() {
 	// Swap fields a and b.
 	l.a, l.b = l.b, l.a
 
-	// increment generation count	
-    l.g++
+	// increment generation count
+	l.g++
 }
 
 // String returns the game board as a string.
@@ -99,79 +132,141 @@ func (l *Life) String() string {
 	var buf bytes.Buffer
 	for y := 0; y < l.h; y++ {
 		for x := 0; x < l.w; x++ {
-			b := byte(' ')
+			cell := []byte(deadcell)
 			if l.a.Alive(x, y) {
-				b = '*'
+				cell = livecell
 			}
-			buf.WriteByte(' ')
-			buf.WriteByte(b)
+			buf.Write(cell)
 		}
 		buf.WriteByte('\n')
 	}
 	return buf.String()
 }
 
-func (l *Life) show() {
-    fmt.Printf("\n\n\n\nGeneration %d of %d:\n\n%s", l.g, gens, l)
+func (l *Life) showGeneration(nth int) {
+	fmt.Printf("\n\nGeneration %v (%v of %v):\n\n%v", l.g, nth-skipto, gens, l)
 }
 
 func (l *Life) simulate(gens int, delay time.Duration) {
-    for i := 0; i < gens; i++ {
-       l.step()
-       l.show()
-       time.Sleep(delay)
-    }
-    fmt.Printf("%v generations, %v x %v grid, seed=%v\n", l.g, l.h, l.w, seed)
+
+	fmt.Printf("\nConway's Game of Life\n")
+
+	if skipto != 0 {
+		fmt.Printf("\nStarting from generation %v...", skipto)
+	}
+
+	maxgen := gens + skipto
+	skipto--
+	for i := 0; i < maxgen; i++ {
+		l.step()
+		if skipto <= i {
+			l.showGeneration(i)
+			time.Sleep(delay)
+		}
+	}
+
+	fmt.Printf("%v generations, %v x %v grid, seed=%v\n\n", l.g, l.h, l.w, seed)
 }
 
-var (
-   seed int64
-   gens int
-)
-
 func initSeed() {
-    if seed == 0 {
-        seed = time.Now().UnixNano()
-    }
+	if seed == 0 {
+		seed = time.Now().UnixNano()
+	}
 	rand.Seed(seed)
 }
 
-func parseCommandLineFlags() (width, height, perSec int) {
+func initLiveCell() {
+	switch livename {
+	case "aster-1":
+		livecell = []byte(liveAster1)
+	case "aster-2":
+		livecell = []byte(liveAster2)
+	case "bug":
+		livecell = []byte(liveBug)
+	case "circle-x":
+		livecell = []byte(liveCircleX)
+	case "dot-star":
+		livecell = []byte(liveDotStar)
+	case "fat-x":
+		livecell = []byte(liveFatX)
+	case "green-x":
+		livecell = []byte(liveGreenX)
+	case "little-man":
+		livecell = []byte(liveLilman)
+	case "redhat":
+		livecell = []byte(liveRedHat)
+	case "skull-x":
+		livecell = []byte(liveSkullX)
+	case "snowman":
+		livecell = []byte(liveSnowman)
+	case "star":
+		livecell = []byte(liveStar)
+	default:
+		livecell = []byte(liveWhiteDot)
+	}
+}
 
-    flag.Int64Var(&seed, "seed", 0, 
-       "seed for initial population; default will use random N")
-    
+func checkSkipping() {
+	if skipto < 0 {
+		skipto = 0
+	}
+}
+
+func parseflags() (width, height, perSec int) {
+
+	flag.Int64Var(&seed, "seed", 0,
+		"seed for initial population (default random)")
+
+	flag.IntVar(&perSec, "d", 5, "delay 1/`N` seconds between generations")
 	flag.IntVar(&height, "h", 30, "height of simulation field")
 	flag.IntVar(&width, "w", 30, "width of simulation field")
-	flag.IntVar(&gens, "n", 20, "simulate N generations")
-    flag.IntVar(&perSec, "d",  5, "delay 1/N seconds between generations")	
-    
-    flag.Parse()
-    
-    initSeed()
-    
-    return
-    
-//    gens, _ := strconv.Atoi(os.Args[1])
-//    perSec, _ := strconv.Atoi(os.Args[2])
+	flag.IntVar(&gens, "n", 20, "display up to `N` generations")
+	flag.IntVar(&skipto, "from", 0, "display from generation `N`")
+	flag.StringVar(&livename, "live", "", "`name` of dingbat used to depict a live cell (default whitedot)")
 
-//	hPtr := flag.Int("h", 30, "height of simulation field")
-//	wPtr := flag.Int("w", 30, "width of simulation field")
-//	gPtr := flag.Int("n", 20, "simulate n generations")
-//   pPtr := flag.Int("d",  5, "delay 1/d seconds between generations")	
+	flag.Parse()
 
-//    width = *wPtr
-//    height = *hPtr
-//    gens = *gPtr
-//    perSec = *pPtr
+	initSeed()
+	initLiveCell()
+	checkSkipping()
+
+	return
+}
+
+func addUsageInfo() {
+	defaultUsage := flag.Usage
+	flag.Usage = func() {
+		defaultUsage()
+		fmt.Fprintf(os.Stderr,
+			"\nAvailable dingbats for live cells:\n\n"+
+				"Name    \tDescription\n"+
+				"--------\t-----------\n"+
+				"aster-1 \tAsterisk 1\n"+
+				"aster-2 \tAsterisk 2\n"+
+				"bug     \tBug\n"+
+				"circle-x\tWhite circle with an X\n"+
+				"dot-star\tDot with star\n"+
+				"fat-x   \tFat white X\n"+
+				"green-x \tGreen square with white X\n"+
+				"little-man\tLittle yellow man\n"+
+				"no-entry\tRed no entry sign\n"+
+				"redhat  \tRed hardhat with white cross\n"+
+				"skull-x \tSkull and crossbones\n"+
+				"snowman \tSnowman\n"+
+				"star    \tWhite star\n"+
+				"whitedot\tWhite dot (default)\n",
+		)
+	}
 }
 
 func main() {
 
-    width, height, perSec := parseCommandLineFlags()
+	addUsageInfo()
+
+	width, height, perSec := parseflags()
 
 	NewLife(width, height).simulate(
-	   gens, 
-	   time.Second / time.Duration(perSec),
+		gens,
+		time.Second/time.Duration(perSec),
 	)
 }
