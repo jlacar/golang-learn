@@ -225,7 +225,7 @@ func usage() {
 				icon["dot-star"]+"\tdot-star\tDot with star\n"+
 				icon["fat-x"]+"\tfat-x\t\tFat white X\n"+
 				icon["green-x"]+"\tgreen-x\t\tGreen square with white X\n"+
-				icon["man-dribble"]+"\tmad-dribble\tMan dribbling ball\n"+
+				icon["man-dribble"]+"\tman-dribble\tMan dribbling ball\n"+
 				icon["man-yellow"]+"\tman-yellow\tLittle yellow man\n"+
 				icon["no-entry"]+"\tno-entry\tNo entry sign\n"+
 				icon["redhat"]+"\tredhat\t\tRed hardhat with white cross\n"+
