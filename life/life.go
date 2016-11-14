@@ -15,26 +15,6 @@ import (
 
 const (
 	deadcell = "  "
-	// \u263A smile-white
-	// \u263B smile-black
-	// \u26AA dot-white
-	// \u26B1 little-man
-	// \u26F9 man-dribble
-
-	liveAster1   = " \u2731"
-	liveAster2   = " \u2749"
-	liveBug      = " \u2603"
-	liveCircleX  = " \u2A02"
-	liveDotStar  = " \u272A"
-	liveFatX     = " \u2716"
-	liveGreenX   = " \u274E"
-	liveLilman   = " \u26B1"
-	liveNoEntry  = " \u26D4"
-	liveRedHat   = " \u26D1"
-	liveSkullX   = " \u2620"
-	liveSnowman  = " \u26C4"
-	liveStar     = " \u2606"
-	liveWhiteDot = " \u26AA"
 )
 
 var (
@@ -43,6 +23,7 @@ var (
 	skipto   int
 	livename string
 	livecell []byte
+	dingbats map[string]string
 )
 
 // Field represents a two-dimensional field of cells.
@@ -175,35 +156,12 @@ func initSeed() {
 	rand.Seed(seed)
 }
 
-func initLiveCell() {
-	switch livename {
-	case "aster-1":
-		livecell = []byte(liveAster1)
-	case "aster-2":
-		livecell = []byte(liveAster2)
-	case "bug":
-		livecell = []byte(liveBug)
-	case "circle-x":
-		livecell = []byte(liveCircleX)
-	case "dot-star":
-		livecell = []byte(liveDotStar)
-	case "fat-x":
-		livecell = []byte(liveFatX)
-	case "green-x":
-		livecell = []byte(liveGreenX)
-	case "little-man":
-		livecell = []byte(liveLilman)
-	case "redhat":
-		livecell = []byte(liveRedHat)
-	case "skull-x":
-		livecell = []byte(liveSkullX)
-	case "snowman":
-		livecell = []byte(liveSnowman)
-	case "star":
-		livecell = []byte(liveStar)
-	default:
-		livecell = []byte(liveWhiteDot)
+func initDisplay() {
+	ding, ok := dingbats[livename]
+	if !ok {
+		ding = dingbats["whitedot"]
 	}
+	livecell = []byte(" " + ding)
 }
 
 func checkSkipping() {
@@ -227,13 +185,35 @@ func parseflags() (width, height, perSec int) {
 	flag.Parse()
 
 	initSeed()
-	initLiveCell()
+	initDisplay()
 	checkSkipping()
 
 	return
 }
 
 func addUsageInfo() {
+	// \u263A smile-white
+	// \u263B smile-black
+	// \u26AA dot-white
+	// \u26B1 little-man
+	// \u26F9 man-dribble
+
+	dingbats = make(map[string]string)
+	dingbats["aster-1"] = "\u2731"
+	dingbats["aster-2"] = "\u2749"
+	dingbats["bug"] = "\u2603"
+	dingbats["circle-x"] = "\u2A02"
+	dingbats["dot-star"] = "\u272A"
+	dingbats["fat-x"] = "\u2716"
+	dingbats["green-x"] = "\u274E"
+	dingbats["little-man"] = "\u26B1"
+	dingbats["no-entry"] = "\u26D4"
+	dingbats["redhat"] = "\u26D1"
+	dingbats["skull-x"] = "\u2620"
+	dingbats["snowman"] = "\u26C4"
+	dingbats["star"] = "\u2606"
+	dingbats["whitedot"] = "\u26AA"
+
 	defaultUsage := flag.Usage
 	flag.Usage = func() {
 		defaultUsage()
