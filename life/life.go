@@ -83,7 +83,7 @@ func (f *Field) Alive(x, y int) bool {
 	x %= f.w
 	y += f.h
 	y %= f.h
-	return f.s[y][x]
+	return f.s[y][x] // && !f.BlackHoled(y, x)
 }
 
 // Next returns the state of the specified cell at the next time step.
@@ -188,11 +188,15 @@ func (l *Life) simulate(gens int, delay time.Duration) {
 	l.showSummary()
 }
 
-func initSeed() {
-	if seed == 0 {
-		seed = time.Now().UnixNano()
+func initSeed(w, h int) {
+	// default to random location seeder
+	if Seeder == nil {
+		if seed == 0 {
+			seed = time.Now().UnixNano()
+		}
+		rand.Seed(seed)
+		Seeder = NewRandomLocationProvider(w, h)
 	}
-	rand.Seed(seed)
 }
 
 func initDisplay() {
@@ -224,7 +228,7 @@ func parseflags() (width, height, stepsPerSecond int) {
 
 	flag.Parse()
 
-	initSeed()
+	initSeed(width, height)
 	initDisplay()
 	checkStartGeneration()
 
@@ -302,10 +306,6 @@ func main() {
 	usage()
 
 	width, height, stepsPerSecond := parseflags()
-
-	if Seeder == nil {
-		Seeder = NewRandomLocationProvider(width, height)
-	}
 
 	NewLife(width, height).simulate(
 		gens,
