@@ -224,7 +224,8 @@ func usage() {
 	icon["snowman"] = "\u26C4"
 	icon["square-big"] = "\u2B1C"
 	icon["square-small"] = "\u25A9"
-	icon["star"] = "\u2605"
+	icon["star-yellow"] = "\u2B50"
+	icon["star-white"] = "\u2605"
 	icon["star-6pt"] = "\u2736"
 	icon["star-8pt"] = "\u2738"
 	icon["whitedot"] = "\u26AA"
@@ -257,7 +258,8 @@ func usage() {
 				icon["snowman"]+"\tsnowman\t\tSnowman\n"+
 				icon["square-big"]+"\tsquare-big\tBig square\n"+
 				icon["square-small"]+"\tsquare-small\tSmall square\n"+
-				icon["star"]+"\tstar\t\t5-point star\n"+
+				icon["star-yellow"]+"\tstar-yellow\tYellow 5-point star\n"+
+				icon["star-white"]+"\tstar-white\tWhite 5-point star\n"+
 				icon["star-6pt"]+"\tstar-6pt\t6-point star\n"+
 				icon["star-8pt"]+"\tstar-8pt\t8-point star\n"+
 				icon["whitedot"]+"\twhitedot\tWhite dot\n",
