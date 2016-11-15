@@ -17,7 +17,13 @@ const (
 	deadcell = "  "
 )
 
+type LocationSource interface {
+	NextLocation() (x, y int)
+}
+
 var (
+	Seeder LocationSource
+
 	seed     int64
 	gens     int
 	startGen int
@@ -25,6 +31,18 @@ var (
 	livecell []byte
 	icon     map[string]string
 )
+
+type RandomLocationProvider struct {
+	w, h int
+}
+
+func (r *RandomLocationProvider) NextLocation() (x, y int) {
+	return rand.Intn(r.w), rand.Intn(r.h)
+}
+
+func NewRandomLocationProvider(w, h int) *RandomLocationProvider {
+	return &RandomLocationProvider{w: w, h: h}
+}
 
 // Field represents a two-dimensional field of cells.
 type Field struct {
@@ -85,7 +103,8 @@ type Life struct {
 func NewLife(w, h int) *Life {
 	a := NewField(w, h)
 	for i := 0; i < (w * h / 4); i++ {
-		a.Set(rand.Intn(w), rand.Intn(h), true)
+		x, y := Seeder.NextLocation()
+		a.Set(x, y, true)
 	}
 	return &Life{
 		a: a, b: NewField(w, h),
@@ -272,6 +291,10 @@ func main() {
 	usage()
 
 	width, height, stepsPerSecond := parseflags()
+
+	if Seeder == nil {
+		Seeder = NewRandomLocationProvider(width, height)
+	}
 
 	NewLife(width, height).simulate(
 		gens,
