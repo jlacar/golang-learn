@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"time"
@@ -19,6 +20,7 @@ const (
 
 type LocationSource interface {
 	NextLocation() (x, y int)
+	HasNext() bool
 }
 
 var (
@@ -33,11 +35,20 @@ var (
 )
 
 type RandomLocationProvider struct {
+	i    int
 	w, h int
 }
 
 func (r *RandomLocationProvider) NextLocation() (x, y int) {
+	if !r.HasNext() {
+		log.Fatal("NextLocation(): no next location available")
+	}
+	r.i++
 	return rand.Intn(r.w), rand.Intn(r.h)
+}
+
+func (r *RandomLocationProvider) HasNext() bool {
+	return r.i < r.w*r.h/4
 }
 
 func NewRandomLocationProvider(w, h int) *RandomLocationProvider {
@@ -99,10 +110,10 @@ type Life struct {
 	w, h, g int
 }
 
-// NewLife returns a new Life game state with a random initial state.
+// NewLife returns a new Life game state with initial state provided by Seeder
 func NewLife(w, h int) *Life {
 	a := NewField(w, h)
-	for i := 0; i < (w * h / 4); i++ {
+	for Seeder.HasNext() {
 		x, y := Seeder.NextLocation()
 		a.Set(x, y, true)
 	}
