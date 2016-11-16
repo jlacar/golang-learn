@@ -29,6 +29,7 @@ var (
 	seed     int64
 	gens     int
 	startGen int
+	initPath string
 	iconName string
 	livecell []byte
 	icon     map[string]string
@@ -189,6 +190,11 @@ func (l *Life) simulate(gens int, delay time.Duration) {
 }
 
 func initSeed(w, h int) {
+	// check for initPath option
+	if initPath != "" {
+		Seeder = NewFileLocationSource(initPath, w, h)
+	}
+
 	// default to random location seeder
 	if Seeder == nil {
 		if seed == 0 {
@@ -219,6 +225,7 @@ func parseflags() (width, height, stepsPerSecond int) {
 	flag.Int64Var(&seed, "seed", 0,
 		"seed for initial population (default random)")
 
+	flag.StringVar(&initPath, "f", "", "seed population from `filename`")
 	flag.IntVar(&height, "y", 30, "height of simulation field")
 	flag.IntVar(&width, "x", 30, "width of simulation field")
 	flag.IntVar(&gens, "n", 20, "display up to `N` generations")
