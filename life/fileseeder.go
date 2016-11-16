@@ -19,9 +19,8 @@ type FileLocationSource struct {
 }
 
 func (f *FileLocationSource) NextLocation() (x, y int) {
-	if f.i >= len(f.locs) {
-		log.Fatal("Illegal state: no more locations available")
-	}
+	assertHasNext(f)
+
 	y = f.locs[f.i].Y
 	x = f.locs[f.i].X
 	f.i++

@@ -40,10 +40,15 @@ type RandomLocationProvider struct {
 	w, h int
 }
 
-func (r *RandomLocationProvider) NextLocation() (x, y int) {
-	if !r.HasNext() {
-		log.Fatal("NextLocation(): no next location available")
+func assertHasNext(l LocationSource) {
+	if !l.HasNext() {
+		log.Fatal("Illegal state: no more locations available")
 	}
+}
+
+func (r *RandomLocationProvider) NextLocation() (x, y int) {
+	assertHasNext(r)
+
 	r.i++
 	return rand.Intn(r.w), rand.Intn(r.h)
 }
