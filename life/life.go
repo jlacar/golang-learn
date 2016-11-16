@@ -22,13 +22,13 @@ type FieldLocation struct {
 	X, Y int
 }
 
-type LocationSource interface {
-	NextLocation() (loc *FieldLocation)
-	HasNext() bool
+type LocationProvider interface {
+	NewLocation() (loc *FieldLocation)
+	MoreLocations() bool
 }
 
 var (
-	Seeder LocationSource
+	Seeder LocationProvider
 
 	seed     int64
 	gens     int
@@ -44,19 +44,19 @@ type RandomLocationProvider struct {
 	w, h int
 }
 
-func assertHasNext(l LocationSource) {
-	if !l.HasNext() {
+func assertMoreLocations(l LocationProvider) {
+	if !l.MoreLocations() {
 		log.Fatal("Illegal state: no more locations available")
 	}
 }
 
-func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
-	assertHasNext(r)
+func (r *RandomLocationProvider) NewLocation() (loc *FieldLocation) {
+	assertMoreLocations(r)
 	r.i++
 	return &FieldLocation{X: rand.Intn(r.w), Y: rand.Intn(r.h)}
 }
 
-func (r *RandomLocationProvider) HasNext() bool {
+func (r *RandomLocationProvider) MoreLocations() bool {
 	return r.i < r.w*r.h/4
 }
 
@@ -122,8 +122,8 @@ type Life struct {
 // NewLife returns a new Life game state with initial state provided by Seeder
 func NewLife(w, h int) *Life {
 	a := NewField(w, h)
-	for Seeder.HasNext() {
-		a.Set(Seeder.NextLocation(), true)
+	for Seeder.MoreLocations() {
+		a.Set(Seeder.NewLocation(), true)
 	}
 	return &Life{
 		a: a, b: NewField(w, h),
@@ -199,7 +199,7 @@ func (l *Life) simulate(gens int, delay time.Duration) {
 func initSeed(w, h int) {
 	// check for initPath option
 	if initPath != "" {
-		Seeder = NewFileLocationSource(initPath, w, h)
+		Seeder = NewFileLocationProvider(initPath, w, h)
 	}
 
 	// default to random location seeder

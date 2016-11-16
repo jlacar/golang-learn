@@ -8,24 +8,24 @@ import (
 	"strings"
 )
 
-type FileLocationSource struct {
+type FileLocationProvider struct {
 	w, h, i int
 
 	locs []FieldLocation
 }
 
-func (f *FileLocationSource) NextLocation() (loc *FieldLocation) {
-	assertHasNext(f)
+func (f *FileLocationProvider) NewLocation() (loc *FieldLocation) {
+	assertMoreLocations(f)
 	loc = &FieldLocation{Y: f.locs[f.i].Y, X: f.locs[f.i].X}
 	f.i++
 	return
 }
 
-func (f *FileLocationSource) HasNext() bool {
+func (f *FileLocationProvider) MoreLocations() bool {
 	return f.i < len(f.locs)
 }
 
-func NewFileLocationSource(path string, w, h int) *FileLocationSource {
+func NewFileLocationProvider(path string, w, h int) *FileLocationProvider {
 	lines, err := readLines(path)
 	if err != nil {
 		log.Printf("Could not read file [%v]: %v", path, err.Error())
@@ -42,7 +42,7 @@ func NewFileLocationSource(path string, w, h int) *FileLocationSource {
 			locs = append(locs, morelocs...)
 		}
 	}
-	return &FileLocationSource{w: w, h: h, locs: locs}
+	return &FileLocationProvider{w: w, h: h, locs: locs}
 }
 
 func parseFieldConfig(configstr string) (locs []FieldLocation) {
