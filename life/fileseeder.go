@@ -8,21 +8,15 @@ import (
 	"strings"
 )
 
-type FieldLocation struct {
-	X, Y int
-}
-
 type FileLocationSource struct {
 	w, h, i int
 
 	locs []FieldLocation
 }
 
-func (f *FileLocationSource) NextLocation() (x, y int) {
+func (f *FileLocationSource) NextLocation() (loc *FieldLocation) {
 	assertHasNext(f)
-
-	y = f.locs[f.i].Y
-	x = f.locs[f.i].X
+	loc = &FieldLocation{Y: f.locs[f.i].Y, X: f.locs[f.i].X}
 	f.i++
 	return
 }

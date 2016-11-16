@@ -18,8 +18,12 @@ const (
 	deadcell = "  "
 )
 
+type FieldLocation struct {
+	X, Y int
+}
+
 type LocationSource interface {
-	NextLocation() (x, y int)
+	NextLocation() (loc *FieldLocation)
 	HasNext() bool
 }
 
@@ -46,11 +50,10 @@ func assertHasNext(l LocationSource) {
 	}
 }
 
-func (r *RandomLocationProvider) NextLocation() (x, y int) {
+func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
 	assertHasNext(r)
-
 	r.i++
-	return rand.Intn(r.w), rand.Intn(r.h)
+	return &FieldLocation{X: rand.Intn(r.w), Y: rand.Intn(r.h)}
 }
 
 func (r *RandomLocationProvider) HasNext() bool {
@@ -77,8 +80,8 @@ func NewField(w, h int) *Field {
 }
 
 // Set sets the state of the specified cell to the given value.
-func (f *Field) Set(x, y int, b bool) {
-	f.s[y][x] = b
+func (f *Field) Set(loc *FieldLocation, alive bool) {
+	f.s[loc.Y][loc.X] = alive
 }
 
 // Alive reports whether the specified cell is alive.
@@ -120,8 +123,7 @@ type Life struct {
 func NewLife(w, h int) *Life {
 	a := NewField(w, h)
 	for Seeder.HasNext() {
-		x, y := Seeder.NextLocation()
-		a.Set(x, y, true)
+		a.Set(Seeder.NextLocation(), true)
 	}
 	return &Life{
 		a: a, b: NewField(w, h),
@@ -134,7 +136,7 @@ func (l *Life) step() {
 	// Update the state of the next field (b) from the current field (a).
 	for y := 0; y < l.h; y++ {
 		for x := 0; x < l.w; x++ {
-			l.b.Set(x, y, l.a.Next(x, y))
+			l.b.Set(&FieldLocation{X: x, Y: y}, l.a.Next(x, y))
 		}
 	}
 	// Swap fields a and b.
