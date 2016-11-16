@@ -156,7 +156,7 @@ func (l *Life) String() string {
 }
 
 func (l *Life) showGeneration(nth int) {
-	fmt.Printf("\n\nGeneration %v (%v of %v):\n\n%v", l.g, nth-startGen+1, gens, l)
+	fmt.Printf("\n\nGeneration %v (%v of %v):\n\n%v", l.g+1, nth-startGen+1, gens, l)
 }
 
 func (l *Life) showSummary() {
@@ -179,11 +179,11 @@ func (l *Life) simulate(gens int, delay time.Duration) {
 
 	maxgen := gens + startGen
 	for i := 0; i < maxgen; i++ {
-		l.step()
 		if startGen <= i {
 			l.showGeneration(i)
 			time.Sleep(delay)
 		}
+		l.step()
 	}
 
 	l.showSummary()
