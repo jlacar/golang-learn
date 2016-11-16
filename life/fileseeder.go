@@ -46,16 +46,26 @@ func NewFileLocationProvider(path string, w, h int) *FileLocationProvider {
 }
 
 func parseFieldConfig(configstr string) (locs []FieldLocation) {
+	if strings.IndexRune(configstr, '#') == 0 {
+		log.Println(configstr)
+		return nil
+	}
 	parts := strings.Split(configstr, ":")
 	if len(parts) != 2 {
+		log.Printf("Line ignored: [%v]\n", configstr)
+		return nil
+	}
+	y, err := strconv.Atoi(parts[0])
+	if err != nil {
+		log.Printf("Invalid row number in field file: [%v]\n", parts[0])
 		return nil
 	}
 	cols := parseFieldConfigColumns(parts[1])
 	if len(cols) == 0 {
+		log.Printf("Empty line ignored")
 		return nil
 	}
 	locs = make([]FieldLocation, len(cols))
-	y, _ := strconv.Atoi(parts[0])
 	for i, x := range cols {
 		locs[i] = FieldLocation{Y: y, X: x}
 	}

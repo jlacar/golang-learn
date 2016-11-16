@@ -1,0 +1,6 @@
+# Die hard - minimal cells but relatively long-live
+# Run with option -n 135 
+#  0...4....9....4....9....4....9....4....
+13:                       #
+14:                 ##
+15:                  #   ###

@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -30,6 +31,7 @@ type LocationProvider interface {
 var (
 	Seeder LocationProvider
 
+	seedflag string
 	seed     int64
 	gens     int
 	startGen int
@@ -168,8 +170,8 @@ func (l *Life) showGeneration(nth int) {
 
 func (l *Life) showSummary() {
 	fmt.Printf("%v generations calculated.\n\n", l.g)
-	fmt.Printf("To continue: %v -y %v -x %v -seed %v -icon %v -s %v -n %v\n", os.Args[0],
-		l.h, l.w, seed, iconName, l.g, gens,
+	fmt.Printf("To continue: %v -y %v -x %v %v -icon %v -s %v -n %v\n", os.Args[0],
+		l.h, l.w, seedflag, iconName, l.g, gens,
 	)
 }
 
@@ -200,6 +202,7 @@ func initSeed(w, h int) {
 	// check for initPath option
 	if initPath != "" {
 		Seeder = NewFileLocationProvider(initPath, w, h)
+		seedflag = "-f " + initPath
 	}
 
 	// default to random location seeder
@@ -209,6 +212,7 @@ func initSeed(w, h int) {
 		}
 		rand.Seed(seed)
 		Seeder = NewRandomLocationProvider(w, h)
+		seedflag = "-seed " + strconv.FormatInt(seed, 10)
 	}
 }
 
