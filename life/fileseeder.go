@@ -36,8 +36,10 @@ func NewFileLocationProvider(path string, w, h int) *FileLocationProvider {
 		return nil
 	}
 	locs := []FieldLocation{}
+	row := -1
 	for _, l := range lines {
-		morelocs := parseFieldConfig(l)
+		morelocs, lastRow := parseFieldConfig(l, row)
+		row = lastRow
 		if morelocs != nil {
 			locs = append(locs, morelocs...)
 		}
@@ -45,26 +47,35 @@ func NewFileLocationProvider(path string, w, h int) *FileLocationProvider {
 	return &FileLocationProvider{w: w, h: h, locs: locs}
 }
 
-func parseFieldConfig(configstr string) (locs []FieldLocation) {
+func parseFieldConfig(configstr string, lastRow int) (locs []FieldLocation, row int) {
 	if strings.IndexRune(configstr, '#') == 0 {
 		log.Println(configstr)
-		return nil
+		return nil, lastRow
 	}
+
+	// check for valid format (row : cells config)
 	parts := strings.Split(configstr, ":")
 	if len(parts) != 2 {
 		log.Printf("Line ignored: [%v]\n", configstr)
-		return nil
+		return nil, lastRow
 	}
+
+	// check for NN:... or ++:...
 	y, err := strconv.Atoi(parts[0])
-	if err != nil {
+	if parts[0] == "++" {
+		y = lastRow + 1
+	} else if err != nil {
 		log.Printf("Invalid row number in field file: [%v]\n", parts[0])
-		return nil
+		return nil, lastRow
 	}
+
 	cols := parseFieldConfigColumns(parts[1])
 	if len(cols) == 0 {
 		log.Printf("Empty line ignored")
-		return nil
+		return nil, y
 	}
+
+	row = y
 	locs = make([]FieldLocation, len(cols))
 	for i, x := range cols {
 		locs[i] = FieldLocation{Y: y, X: x}
