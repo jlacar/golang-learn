@@ -19,7 +19,7 @@ type FieldLocation struct {
 	X, Y int
 }
 
-func (f FieldLocation) String() string {
+func (f *FieldLocation) String() string {
 	return fmt.Sprintf("[row:%v, col:%v]", f.Y, f.X)
 }
 
