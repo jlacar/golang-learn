@@ -237,13 +237,43 @@ func initSeed() {
 	}
 }
 
+var livecell []byte
+
 func initDisplay() {
-	ding, ok := icon[iconName]
+	s, ok := icon[iconName]
 	if !ok {
 		iconName = "blue-circle"
-		ding = icon[iconName]
+		s = icon[iconName]
 	}
-	livecell = []byte(" " + ding)
+	livecell = []byte(" " + s)
+}
+
+var icon = map[string]string{
+	"aster-1":      "\u2731",
+	"aster-2":      "\u2749",
+	"blue-circle":  "\u23FA",
+	"blue-square":  "\u23F9",
+	"bug":          "\u2603",
+	"circle-plus":  "\u2A01",
+	"circle-x":     "\u2A02",
+	"dot-star":     "\u272A",
+	"fat-x":        "\u2716",
+	"flower":       "\u273F",
+	"green-x":      "\u274E",
+	"man-dribble":  "\u26F9",
+	"man-yellow":   "\u26B1",
+	"no-entry":     "\u26D4",
+	"redhat":       "\u26D1",
+	"skull-x":      "\u2620",
+	"snowflake":    "\u274A",
+	"snowman":      "\u26C4",
+	"square-big":   "\u2B1C",
+	"square-small": "\u25A9",
+	"star-yellow":  "\u2B50",
+	"star-white":   "\u2605",
+	"star-6pt":     "\u2736",
+	"star-8pt":     "\u2738",
+	"whitedot":     "\u26AA",
 }
 
 func init() {
@@ -260,38 +290,6 @@ func init() {
 	flag.IntVar(&startGen, "s", 0, "start displaying from generation `N`")
 	flag.StringVar(&iconName, "icon", "", "`name` of icon to use for live cells (default blue-circle)")
 }
-
-var (
-	livecell []byte
-
-	icon = map[string]string{
-		"aster-1":      "\u2731",
-		"aster-2":      "\u2749",
-		"blue-circle":  "\u23FA",
-		"blue-square":  "\u23F9",
-		"bug":          "\u2603",
-		"circle-plus":  "\u2A01",
-		"circle-x":     "\u2A02",
-		"dot-star":     "\u272A",
-		"fat-x":        "\u2716",
-		"flower":       "\u273F",
-		"green-x":      "\u274E",
-		"man-dribble":  "\u26F9",
-		"man-yellow":   "\u26B1",
-		"no-entry":     "\u26D4",
-		"redhat":       "\u26D1",
-		"skull-x":      "\u2620",
-		"snowflake":    "\u274A",
-		"snowman":      "\u26C4",
-		"square-big":   "\u2B1C",
-		"square-small": "\u25A9",
-		"star-yellow":  "\u2B50",
-		"star-white":   "\u2605",
-		"star-6pt":     "\u2736",
-		"star-8pt":     "\u2738",
-		"whitedot":     "\u26AA",
-	}
-)
 
 func usage() {
 
