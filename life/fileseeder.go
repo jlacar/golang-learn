@@ -47,25 +47,40 @@ func NewFileLocationProvider(path string, w, h int) *FileLocationProvider {
 	return &FileLocationProvider{w: w, h: h, locs: locs}
 }
 
+var colOffset int
+
 func parseFieldConfig(configstr string, lastRow int) (locs []FieldLocation, row int) {
 	if strings.IndexRune(configstr, '#') == 0 {
 		log.Println(configstr)
 		return nil, lastRow
 	}
 
-	// check for valid format (row : cells config)
+	// check for valid format (NN|++|>>: ...)
 	parts := strings.Split(configstr, ":")
 	if len(parts) != 2 {
 		log.Printf("Line ignored: [%v]\n", configstr)
 		return nil, lastRow
 	}
 
-	// check for NN:... or ++:...
+	// check for column offset control: >>:NN
+	if parts[0] == ">>" {
+		co, err := strconv.Atoi(parts[1])
+		if err == nil {
+			log.Printf("Column offset: [%v]", co)
+			colOffset = co
+		} else {
+			log.Printf("Invalid column offset: [%v]", parts[1])
+		}
+		return nil, lastRow
+	}
+
 	y, err := strconv.Atoi(parts[0])
+
+	// check for next row control: ++:...
 	if parts[0] == "++" {
 		y = lastRow + 1
 	} else if err != nil {
-		log.Printf("Invalid row number in field file: [%v]\n", parts[0])
+		log.Printf("Invalid row number: [%v]\n", parts[0])
 		return nil, lastRow
 	}
 
@@ -78,7 +93,7 @@ func parseFieldConfig(configstr string, lastRow int) (locs []FieldLocation, row 
 	row = y
 	locs = make([]FieldLocation, len(cols))
 	for i, x := range cols {
-		locs[i] = FieldLocation{Y: y, X: x}
+		locs[i] = FieldLocation{Y: y, X: x + colOffset}
 	}
 	return
 }

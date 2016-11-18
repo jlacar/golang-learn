@@ -180,7 +180,7 @@ func (l *Life) String() string {
 }
 
 func (l *Life) showGeneration(nth int) {
-	fmt.Printf("\n\nGeneration %v (%v of %v):\n\n%v", l.genCount+1, nth-startGen+1, gens, l)
+	fmt.Printf("\n\nGeneration %v (%v of %v):\n%v", l.genCount+1, nth-startGen+1, gens, l)
 }
 
 func (l *Life) showSummary() {
