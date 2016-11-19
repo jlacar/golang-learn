@@ -38,7 +38,7 @@ func NewFileLocationProvider(path string, w, h int) *FileLocationProvider {
 	locs := []FieldLocation{}
 	row := -1
 	for _, l := range lines {
-		morelocs, lastRow := parseFieldConfig(l, row)
+		morelocs, lastRow := parseConfigLine(l, row)
 		row = lastRow
 		if len(morelocs) != 0 {
 			locs = append(locs, morelocs...)
@@ -49,7 +49,7 @@ func NewFileLocationProvider(path string, w, h int) *FileLocationProvider {
 
 var columnOffset int // added to X of new FieldLocations
 
-func parseFieldConfig(configline string, lastRow int) (locs []FieldLocation, row int) {
+func parseConfigLine(configline string, lastRow int) (locs []FieldLocation, row int) {
 	if strings.IndexRune(configline, '#') == 0 {
 		log.Println(configline)
 		return nil, lastRow
@@ -87,7 +87,7 @@ func parseFieldConfig(configline string, lastRow int) (locs []FieldLocation, row
 	}
 
 	// NN: ...
-	cols := parseFieldConfigColumns(data)
+	cols := parseConfigLineMarkings(data)
 	if len(cols) == 0 {
 		log.Println(configline)
 		return nil, y
@@ -101,11 +101,13 @@ func parseFieldConfig(configline string, lastRow int) (locs []FieldLocation, row
 	return
 }
 
-func parseFieldConfigColumns(configstr string) []int {
+// parseFieldConfigColumns parses one line read from the
+// configuration file.
+func parseConfigLineMarkings(markedLine string) []int {
 	cols := []int{}
-	chars := strings.Split(configstr, "")
-	for x, ch := range chars {
-		if ch != " " {
+	markings := strings.Split(markedLine, "")
+	for x, mark := range markings {
+		if mark != " " {
 			cols = append(cols, x)
 		}
 	}
