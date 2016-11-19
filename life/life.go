@@ -39,17 +39,17 @@ func AssertMoreLocations(l LocationProvider) {
 }
 
 var (
-	// provides locations for initial population
+	// provider of initial population locations
 	Seeder LocationProvider
 
-	// option flag variables
+	// flag option variables
 	fieldWidth  int
 	fieldHeight int
-	seedflag    string
-	seed        int64
 	gens        int
 	gensPerSec  int
 	startGen    int
+	seed        int64
+	seedflag    string
 	initPath    string
 	iconName    string
 )
@@ -68,7 +68,7 @@ func NewRandomLocationProvider(w, h int) *RandomLocationProvider {
 func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
 	AssertMoreLocations(r)
 	r.i++
-	return &FieldLocation{X: rand.Intn(r.width), Y: rand.Intn(r.height)}
+	return NewFieldLocation(rand.Intn(r.width), rand.Intn(r.height))
 }
 
 func (r *RandomLocationProvider) MoreLocations() bool {
@@ -253,7 +253,7 @@ var livecell []byte
 func initDisplay() {
 	s, ok := icon[iconName]
 	if !ok {
-		iconName = "blue-circle"
+		iconName = "blue-circle" // DEVELOPER: if you edit this, edit usage(), too!
 		s = icon[iconName]
 	}
 	livecell = []byte(" " + s)
