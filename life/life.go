@@ -156,7 +156,7 @@ func NewLife(w, h int) *Life {
 func (l *Life) prepareNextGeneration() {
 	for y := 0; y < l.height; y++ {
 		for x := 0; x < l.width; x++ {
-			l.nextGen.set(&FieldLocation{X: x, Y: y}, l.thisGen.next(x, y))
+			l.nextGen.set(NewFieldLocation(x, y), l.thisGen.next(x, y))
 		}
 	}
 }
