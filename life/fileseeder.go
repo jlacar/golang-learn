@@ -40,60 +40,63 @@ func NewFileLocationProvider(path string, w, h int) *FileLocationProvider {
 	for _, l := range lines {
 		morelocs, lastRow := parseFieldConfig(l, row)
 		row = lastRow
-		if morelocs != nil {
+		if len(morelocs) != 0 {
 			locs = append(locs, morelocs...)
 		}
 	}
 	return &FileLocationProvider{w: w, h: h, locs: locs}
 }
 
-var colOffset int
+var columnOffset int // added to X of new FieldLocations
 
-func parseFieldConfig(configstr string, lastRow int) (locs []FieldLocation, row int) {
-	if strings.IndexRune(configstr, '#') == 0 {
-		log.Println(configstr)
+func parseFieldConfig(configline string, lastRow int) (locs []FieldLocation, row int) {
+	if strings.IndexRune(configline, '#') == 0 {
+		log.Println(configline)
 		return nil, lastRow
 	}
 
 	// check for valid format (NN|++|>>: ...)
-	parts := strings.Split(configstr, ":")
+	parts := strings.Split(configline, ":")
 	if len(parts) != 2 {
-		log.Printf("Line ignored: [%v]\n", configstr)
+		log.Println(configline)
 		return nil, lastRow
 	}
 
-	// check for column offset control: >>:NN
-	if parts[0] == ">>" {
-		co, err := strconv.Atoi(parts[1])
+	header, data := parts[0], parts[1]
+
+	// >>:NN -- offset column to NN
+	if header == ">>" {
+		co, err := strconv.Atoi(data)
 		if err == nil {
-			log.Printf("Column offset: [%v]", co)
-			colOffset = co
+			log.Printf(">> [%v]", co)
+			columnOffset = co
 		} else {
-			log.Printf("Invalid column offset: [%v]", parts[1])
+			log.Println(configline)
 		}
 		return nil, lastRow
 	}
 
-	y, err := strconv.Atoi(parts[0])
+	y, err := strconv.Atoi(header)
 
-	// check for next row control: ++:...
-	if parts[0] == "++" {
+	// ++: -- use lastRow + 1
+	if header == "++" {
 		y = lastRow + 1
 	} else if err != nil {
-		log.Printf("Invalid row number: [%v]\n", parts[0])
+		log.Println(configline)
 		return nil, lastRow
 	}
 
-	cols := parseFieldConfigColumns(parts[1])
+	// NN: ...
+	cols := parseFieldConfigColumns(data)
 	if len(cols) == 0 {
-		log.Printf("Empty line ignored")
+		log.Println(configline)
 		return nil, y
 	}
 
 	row = y
 	locs = make([]FieldLocation, len(cols))
 	for i, x := range cols {
-		locs[i] = FieldLocation{Y: y, X: x + colOffset}
+		locs[i] = FieldLocation{Y: y, X: x + columnOffset}
 	}
 	return
 }
@@ -106,10 +109,7 @@ func parseFieldConfigColumns(configstr string) []int {
 			cols = append(cols, x)
 		}
 	}
-	if len(cols) != 0 {
-		return cols
-	}
-	return nil
+	return cols
 }
 
 // readLines reads a whole file into memory

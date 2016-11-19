@@ -84,8 +84,8 @@ func NewField(w, h int) *Field {
 	return &Field{s: s, w: w, h: h}
 }
 
-// Set sets the state of the specified cell to the given value.
-func (f *Field) Set(loc *FieldLocation, alive bool) {
+// set sets the state of the specified cell to the given value.
+func (f *Field) set(loc *FieldLocation, alive bool) {
 	if !f.contains(loc) {
 		log.Printf("Out of bounds: %v", loc)
 		return
@@ -100,10 +100,10 @@ func (f *Field) contains(loc *FieldLocation) bool {
 	return loc.X < f.w && loc.Y < f.h
 }
 
-// Alive reports whether the specified cell is alive.
+// alive reports whether the specified cell is alive.
 // If the x or y coordinates are outside the field boundaries they are wrapped
 // toroidally. For instance, an x value of -1 is treated as width-1.
-func (f *Field) Alive(x, y int) bool {
+func (f *Field) alive(x, y int) bool {
 	x += f.w
 	x %= f.w
 	y += f.h
@@ -111,14 +111,14 @@ func (f *Field) Alive(x, y int) bool {
 	return f.s[y][x] // && !f.BlackHoled(y, x)
 }
 
-// Next returns the state of the specified cell at the next time step.
-func (f *Field) Next(x, y int) bool {
+// next returns the state of the specified cell at the next time step.
+func (f *Field) next(x, y int) bool {
 	// Count the adjacent cells that are alive.
-	alive := 0
+	neighbors := 0
 	for i := -1; i <= 1; i++ {
 		for j := -1; j <= 1; j++ {
-			if (j != 0 || i != 0) && f.Alive(x+i, y+j) {
-				alive++
+			if (j != 0 || i != 0) && f.alive(x+i, y+j) {
+				neighbors++
 			}
 		}
 	}
@@ -126,7 +126,7 @@ func (f *Field) Next(x, y int) bool {
 	//   exactly 3 neighbors: on,
 	//   exactly 2 neighbors: maintain current state,
 	//   otherwise: off.
-	return alive == 3 || alive == 2 && f.Alive(x, y)
+	return neighbors == 3 || neighbors == 2 && f.alive(x, y)
 }
 
 // Life stores the state of a round of Conway's Game of Life.
@@ -139,7 +139,7 @@ type Life struct {
 func NewLife(w, h int) *Life {
 	firstGen := NewField(w, h)
 	for Seeder.MoreLocations() {
-		firstGen.Set(Seeder.NewLocation(), true)
+		firstGen.set(Seeder.NewLocation(), true)
 	}
 	return &Life{
 		thisGen: firstGen, nextGen: NewField(w, h),
@@ -147,19 +147,23 @@ func NewLife(w, h int) *Life {
 	}
 }
 
-// Step advances the game by one instant, recomputing and updating all cells.
-func (l *Life) step() {
-	// Update the state of the next field (b) from the current field (a).
+func (l *Life) prepareNextGeneration() {
 	for y := 0; y < l.height; y++ {
 		for x := 0; x < l.width; x++ {
-			l.nextGen.Set(&FieldLocation{X: x, Y: y}, l.thisGen.Next(x, y))
+			l.nextGen.set(&FieldLocation{X: x, Y: y}, l.thisGen.next(x, y))
 		}
 	}
-	// Swap field roles
-	l.thisGen, l.nextGen = l.nextGen, l.thisGen
+}
 
-	// increment generation count
+func (l *Life) instateNextGeneration() {
+	l.thisGen, l.nextGen = l.nextGen, l.thisGen
 	l.genCount++
+}
+
+// Step advances the game to the next generation
+func (l *Life) step() {
+	l.prepareNextGeneration()
+	l.instateNextGeneration()
 }
 
 // String returns the game board as a string.
@@ -169,7 +173,7 @@ func (l *Life) String() string {
 	for y := 0; y < l.height; y++ {
 		for x := 0; x < l.width; x++ {
 			cell := []byte(deadcell)
-			if l.thisGen.Alive(x, y) {
+			if l.thisGen.alive(x, y) {
 				cell = livecell
 			}
 			buf.Write(cell)
@@ -179,11 +183,12 @@ func (l *Life) String() string {
 	return buf.String()
 }
 
-func (l *Life) showGeneration(nth int) {
-	fmt.Printf("\n\nGeneration %v (%v of %v):\n%v", l.genCount+1, nth-startGen+1, gens, l)
+func (l *Life) showCurrentGeneration(nth int) {
+	fmt.Printf("\n\nGeneration %v (%v of %v):\n%v", l.genCount+1,
+		nth-startGen+1, gens, l)
 }
 
-func (l *Life) showSummary() {
+func (l *Life) showRunInfo() {
 	fmt.Printf("%v generations calculated.\n\n", l.genCount)
 	fmt.Printf("To continue: %v -y %v -x %v %v -icon %v -s %v -n %v\n", os.Args[0],
 		l.height, l.width, seedflag, iconName, l.genCount, gens,
@@ -195,7 +200,7 @@ func (l *Life) stepThroughAll(gens int) {
 	maxgen := gens + startGen
 	for i := 0; i < maxgen; i++ {
 		if startGen <= i {
-			l.showGeneration(i)
+			l.showCurrentGeneration(i)
 			time.Sleep(delay)
 		}
 		l.step()
@@ -206,7 +211,7 @@ func (l *Life) stepThroughAll(gens int) {
 func (l *Life) simulate(gens int) {
 	fmt.Printf("\nConway's Game of Life\n")
 	l.stepThroughAll(gens)
-	l.showSummary()
+	l.showRunInfo()
 }
 
 func initStartGen() {
