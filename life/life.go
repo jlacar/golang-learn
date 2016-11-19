@@ -19,12 +19,16 @@ type FieldLocation struct {
 	X, Y int
 }
 
+func NewFieldLocation(x, y int) *FieldLocation {
+	return &FieldLocation{X: x, Y: y}
+}
+
 func (f *FieldLocation) String() string {
 	return fmt.Sprintf("[row:%v, col:%v]", f.Y, f.X)
 }
 
 type LocationProvider interface {
-	NewLocation() (loc *FieldLocation)
+	NextLocation() (loc *FieldLocation)
 	MoreLocations() bool
 }
 
@@ -55,7 +59,7 @@ func assertMoreLocations(l LocationProvider) {
 	}
 }
 
-func (r *RandomLocationProvider) NewLocation() (loc *FieldLocation) {
+func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
 	assertMoreLocations(r)
 	r.i++
 	return &FieldLocation{X: rand.Intn(r.w), Y: rand.Intn(r.h)}
@@ -139,7 +143,7 @@ type Life struct {
 func NewLife(w, h int) *Life {
 	firstGen := NewField(w, h)
 	for Seeder.MoreLocations() {
-		firstGen.set(Seeder.NewLocation(), true)
+		firstGen.set(Seeder.NextLocation(), true)
 	}
 	return &Life{
 		thisGen: firstGen, nextGen: NewField(w, h),
@@ -227,7 +231,7 @@ func initStartGen() {
 func initSeed() {
 	// -f option
 	if initPath != "" {
-		Seeder = NewFileLocationProvider(initPath, fieldWidth, fieldHeight)
+		Seeder = NewFileLocationProvider(initPath)
 		seedflag = "-f " + initPath
 	}
 
