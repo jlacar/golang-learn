@@ -29,7 +29,7 @@ type FileLocationProvider struct {
 
 // NextLocation returns the next FieldLocation available from the receiving provider.
 func (f *FileLocationProvider) NextLocation() (loc *FieldLocation) {
-	assertMoreLocations(f)
+	AssertMoreLocations(f)
 	loc = &f.locs[f.i]
 	f.i++
 	return

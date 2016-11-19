@@ -32,6 +32,12 @@ type LocationProvider interface {
 	MoreLocations() bool
 }
 
+func AssertMoreLocations(l LocationProvider) {
+	if !l.MoreLocations() {
+		log.Fatal("Illegal state: no more locations available")
+	}
+}
+
 var (
 	// provides locations for initial population
 	Seeder LocationProvider
@@ -48,35 +54,31 @@ var (
 	iconName    string
 )
 
+// RandomLocationProvider provides random FieldLocations that
+// fall within bounds of a field with a given width and height
 type RandomLocationProvider struct {
-	i    int
-	w, h int
-}
-
-func assertMoreLocations(l LocationProvider) {
-	if !l.MoreLocations() {
-		log.Fatal("Illegal state: no more locations available")
-	}
-}
-
-func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
-	assertMoreLocations(r)
-	r.i++
-	return &FieldLocation{X: rand.Intn(r.w), Y: rand.Intn(r.h)}
-}
-
-func (r *RandomLocationProvider) MoreLocations() bool {
-	return r.i < r.w*r.h/4
+	i             int
+	width, height int
 }
 
 func NewRandomLocationProvider(w, h int) *RandomLocationProvider {
-	return &RandomLocationProvider{w: w, h: h}
+	return &RandomLocationProvider{width: w, height: h}
+}
+
+func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
+	AssertMoreLocations(r)
+	r.i++
+	return &FieldLocation{X: rand.Intn(r.width), Y: rand.Intn(r.height)}
+}
+
+func (r *RandomLocationProvider) MoreLocations() bool {
+	return r.i < r.width*r.height/4
 }
 
 // Field represents a two-dimensional field of cells.
 type Field struct {
-	s    [][]bool
-	w, h int
+	state         [][]bool
+	width, height int
 }
 
 // NewField returns an empty field of the specified width and height.
@@ -85,7 +87,7 @@ func NewField(w, h int) *Field {
 	for i := range s {
 		s[i] = make([]bool, w)
 	}
-	return &Field{s: s, w: w, h: h}
+	return &Field{state: s, width: w, height: h}
 }
 
 // set sets the state of the specified cell to the given value.
@@ -94,25 +96,25 @@ func (f *Field) set(loc *FieldLocation, alive bool) {
 		log.Printf("Out of bounds: %v", loc)
 		return
 	}
-	f.s[loc.Y][loc.X] = alive
+	f.state[loc.Y][loc.X] = alive
 }
 
 // contains checks if a Field includes a FieldLocation.
 // Returns true if the give FieldLocation is within the
 // boundaries of the receiving Field
 func (f *Field) contains(loc *FieldLocation) bool {
-	return loc.X < f.w && loc.Y < f.h
+	return loc.X < f.width && loc.Y < f.height
 }
 
 // alive reports whether the specified cell is alive.
 // If the x or y coordinates are outside the field boundaries they are wrapped
 // toroidally. For instance, an x value of -1 is treated as width-1.
 func (f *Field) alive(x, y int) bool {
-	x += f.w
-	x %= f.w
-	y += f.h
-	y %= f.h
-	return f.s[y][x] // && !f.BlackHoled(y, x)
+	x += f.width
+	x %= f.width
+	y += f.height
+	y %= f.height
+	return f.state[y][x] // && !f.BlackHoled(y, x)
 }
 
 // next returns the state of the specified cell at the next time step.
