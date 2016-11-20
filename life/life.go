@@ -27,7 +27,7 @@ func NewFieldLocation(x, y int) *FieldLocation {
 	return &FieldLocation{X: x, Y: y}
 }
 
-func (f *FieldLocation) String() string {
+func (f FieldLocation) String() string {
 	return fmt.Sprintf("[row:%v, col:%v]", f.Y, f.X)
 }
 
@@ -96,7 +96,7 @@ func NewField(w, h int) *Field {
 	return &Field{state: s, width: w, height: h}
 }
 
-// set sets the state of the specified cell to the given value.
+// set assigns a state to the specified cell.
 func (f *Field) set(loc *FieldLocation, alive bool) {
 	if !f.contains(loc) {
 		log.Printf("Out of bounds: %v", loc)
