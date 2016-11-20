@@ -15,6 +15,10 @@ import (
 	"time"
 )
 
+// FieldLocation reifies the concept of a way of identifying where
+// a cell exists with a Field. It takes distinct data points,
+// usually row/column or x/y in a two-dimensional field, and
+// forces them into a single entity, i.e. "reifies" it.
 type FieldLocation struct {
 	X, Y int
 }
@@ -27,6 +31,8 @@ func (f *FieldLocation) String() string {
 	return fmt.Sprintf("[row:%v, col:%v]", f.Y, f.X)
 }
 
+// LocationProvider defines the capabilities that allow something
+// to be a provider for FieldLocation information
 type LocationProvider interface {
 	NextLocation() (loc *FieldLocation)
 	MoreLocations() bool
