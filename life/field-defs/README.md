@@ -12,7 +12,7 @@ by a colon.
 
 ### General line format
 
-A line in the field format file can have two general forms:
+A line in the field definition file can have two general forms:
 
     # comment
     XX: ... cell configuration ...
@@ -26,11 +26,12 @@ The cell configuration part of the line is whatever comes after the ":" separato
 Any non-space characters are considered to be live cells. Any spaces are dead
 cells. The column positions of the cells are determined by their relative
 position from the colon separator. The first position after the colon is column
-0 default. This can be changed by using the column offset notation.
+0 by default. This can be changed by using the column offset notation.
 
 ### Comments
 
-A line that starts with "#" is treated as a comment line
+A line that starts with "#" is treated as a comment line. Use comment lines to
+document the field definition or temporarily disable a configuration line.
 
 Example:
 
@@ -40,6 +41,10 @@ Example:
     #
     # column guide
     # 0...4....9....4....9....4....9....4....9
+    #
+    # following configuration lines are commented out
+    #>>:50
+    #10: @  @@@@@
 
 ### Absolute row
 
@@ -75,7 +80,8 @@ can jump around, although too much of that can make the configuration confusing.
 
 A line that starts with ">>:NN" controls the offset of the columns of any
 subsequent lines parsed. The offset remains in effect until another offset
-setting is parsed.
+setting is parsed. Don't put anything after the column number as this will
+cause a parsing error and the column offset setting on that line will be ignored.
 
     # Sets the column offset to 20
     \>>:20
