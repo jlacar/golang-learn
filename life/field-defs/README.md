@@ -34,9 +34,9 @@ Here is a full example of a configuration for Gosper's Glider Gun:
     #
     #  0...4....9....4....9....4....9....4....
     01:@
-    \>>:60
+    >>:60
     01:@
-    \>>:05
+    >>:05
     05:                         @
     ++:                       @ @
     ++:             @@      @@            @@
@@ -111,10 +111,10 @@ setting is parsed. Don't put anything after the column number as this will
 cause a parsing error and the column offset setting on that line will be ignored.
 
     # Sets the column offset to 20
-    \>>:20
+    >>:20
     # This cell will be located at row 3, column 21
     #  0123456789.....
     03: @
-    \>>:35
+    >>:35
     # These cells will be located at (row:4, col:36) and (row:4, col:38)
     ++: @ @
