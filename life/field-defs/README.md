@@ -17,16 +17,43 @@ A line in the field definition file can have two general forms:
     # comment
     XX: ... cell configuration ...
 
-The first line is a comment line and is described in the next section.
+In the example above, the first line is a comment line.
 
-In the second line, XX is a notation that can be one of ">>", "++", or a number.
-These notations are described in detail below.
+The XX at the start of the second line denotes a notation that can be one
+of ">>", "++", or a number. These notations are described in detail below.
 
 The cell configuration part of the line is whatever comes after the ":" separator.
 Any non-space characters are considered to be live cells. Any spaces are dead
 cells. The column positions of the cells are determined by their relative
 position from the colon separator. The first position after the colon is column
 0 by default. This can be changed by using the column offset notation.
+
+Here is a full example of a configuration for Gosper's Glider Gun:
+
+    # Gosper's Glider Gun configuration
+    #
+    #  0...4....9....4....9....4....9....4....
+    01:@
+    \>>:60
+    01:@
+    \>>:05
+    05:                         @
+    ++:                       @ @
+    ++:             @@      @@            @@
+    ++:            @   @    @@            @@
+    ++: @@        @     @   @@
+    ++: @@        @   @ @@    @ @
+    ++:           @     @       @
+    ++:            @   @
+    ++:             @@
+
+Note the use of the column offset notation and the repeated absolute row.
+Those lines set the horizontal boundaries of the field.
+
+If a field definition requires the field boundaries to be larger than what is
+specified on the command line with the -x and -y options, those options will
+be superceded by the maximum row and column needed to fit the population
+defined in the field definition file.
 
 ### Comments
 
