@@ -38,15 +38,34 @@ type LocationProvider interface {
 	MoreLocations() bool
 }
 
-func AssertMoreLocations(l LocationProvider) {
-	if !l.MoreLocations() {
+type Seeder struct {
+	provider LocationProvider
+}
+
+func NewSeeder(lp LocationProvider) *Seeder {
+	return &Seeder{provider: lp}
+}
+
+func (s Seeder) nextLocation() *FieldLocation {
+	s.assertMoreLocations()
+	return s.provider.NextLocation()
+}
+
+func (s Seeder) moreLocations() bool {
+	return s.provider.MoreLocations()
+}
+
+// assertMoreLocations enforces contract that LocationProvider.NextLocation()
+// can only be called when LocationProvider.MoreLocations() is true.
+func (s Seeder) assertMoreLocations() {
+	if !s.provider.MoreLocations() {
 		log.Fatal("Illegal state: no more locations available")
 	}
 }
 
 var (
 	// provider of initial population locations
-	Seeder LocationProvider
+	seeder *Seeder
 
 	// flag option variables
 	fieldWidth  int
@@ -72,12 +91,11 @@ func NewRandomLocationProvider(w, h int) *RandomLocationProvider {
 }
 
 func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
-	AssertMoreLocations(r)
 	r.i++
 	return NewFieldLocation(rand.Intn(r.width), rand.Intn(r.height))
 }
 
-func (r *RandomLocationProvider) MoreLocations() bool {
+func (r RandomLocationProvider) MoreLocations() bool {
 	return r.i < r.width*r.height/4
 }
 
@@ -150,8 +168,8 @@ type Life struct {
 // NewLife returns a new Life game state with initial state provided by Seeder
 func NewLife(w, h int) *Life {
 	firstGen := NewField(w, h)
-	for Seeder.MoreLocations() {
-		firstGen.set(Seeder.NextLocation(), true)
+	for seeder.moreLocations() {
+		firstGen.set(seeder.nextLocation(), true)
 	}
 	return &Life{
 		thisGen: firstGen, nextGen: NewField(w, h),
@@ -239,17 +257,17 @@ func initStartGen() {
 func initSeed() {
 	// -f option
 	if initPath != "" {
-		Seeder = NewFileLocationProvider(initPath)
+		seeder = NewSeeder(NewFileLocationProvider(initPath))
 		seedflag = "-f " + initPath
 	}
 
 	// default / fallback
-	if Seeder == nil {
+	if seeder == nil {
 		if seed == 0 {
 			seed = time.Now().UnixNano()
 		}
 		rand.Seed(seed)
-		Seeder = NewRandomLocationProvider(fieldWidth, fieldHeight)
+		seeder = NewSeeder(NewRandomLocationProvider(fieldWidth, fieldHeight))
 		seedflag = "-seed " + strconv.FormatInt(seed, 10)
 	}
 }
