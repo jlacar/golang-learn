@@ -26,17 +26,17 @@ func (f *FileLocationProvider) NextLocation() (loc *FieldLocation) {
 }
 
 // MoreLocations returns true if there are more FieldLocations available
-func (f *FileLocationProvider) MoreLocations() bool {
+func (f FileLocationProvider) MoreLocations() bool {
 	return f.i < len(f.locs)
 }
 
 // MinimumBounds reports the minumum width and height of a field that
 // can accomodate all the FieldLocations that will be provided.
-func (f *FileLocationProvider) MinimumBounds() (width, height int) {
+func (f FileLocationProvider) MinimumBounds() (width, height int) {
 	return f.width, f.height
 }
 
-func (f *FileLocationProvider) String() string {
+func (f FileLocationProvider) String() string {
 	return fmt.Sprintf("FileLocationProvider: file: %v minX: %v, minY: %v", f.path, f.width, f.height)
 }
 
