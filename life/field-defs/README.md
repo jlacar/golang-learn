@@ -12,21 +12,32 @@ by a colon.
 
 ### General line format
 
-A line in the field definition file can have two general forms:
+A line in the field definition file can have the following forms:
 
     # comment
-    XX: ... cell configuration ...
 
-In the example above, the first line is a comment line.
+    NN: ... cell configuration ...
 
-The XX at the start of the second line denotes a notation that can be one
-of ">>", "++", or a number. These notations are described in detail below.
+    ++: ... cell configuration ...
 
-The cell configuration part of the line is whatever comes after the ":" separator.
-Any non-space characters are considered to be live cells. Any spaces are dead
-cells. The column positions of the cells are determined by their relative
-position from the colon separator. The first position after the colon is column
-0 by default. This can be changed by using the column offset notation.
+    >>:NN
+
+The first form is a comment line.
+
+The second form is a cell configuration line with an absolute row.
+
+The third form is a cell configuration line with a relative row.
+
+The fourth form is a column offset setting line.
+
+Cell configurations are determined by whatever comes after the ":" separator
+in the second and third forms. Any non-space characters can be used to denote
+live cells. Spaces are used to denote dead cells and need only be included to
+offset live cells from the leftmost column.
+
+The column offsets of the cells are determined by their relative position from
+the colon separator. The first position after the colon is column 0 by default.
+The column offset can be changed by using a column offset setting line.
 
 Here is a full example of a configuration for Gosper's Glider Gun:
 
@@ -47,13 +58,13 @@ Here is a full example of a configuration for Gosper's Glider Gun:
     ++:            @   @
     ++:             @@
 
-Note the use of the column offset notation and the repeated absolute row.
+Note the use of the column offset setting and the repeated absolute row.
 Those lines set the horizontal boundaries of the field.
 
 If a field definition requires the field boundaries to be larger than what is
 specified on the command line with the -x and -y options, those options will
-be superceded by the maximum row and column needed to fit the population
-defined in the field definition file.
+be superseded by the minimum width and height of a field that can accommodate
+the population defined in the field definition file.
 
 ### Comments
 
