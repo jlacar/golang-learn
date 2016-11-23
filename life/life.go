@@ -31,11 +31,18 @@ func (f FieldLocation) String() string {
 	return fmt.Sprintf("[row:%v, col:%v]", f.Y, f.X)
 }
 
-// LocationProvider defines the capabilities that allow something
-// to be a provider for FieldLocation information
+// LocationProvider defines functions of a provider of FieldLocations
 type LocationProvider interface {
+	// NextLocation returns the next FieldLocation this provider has to give
 	NextLocation() (loc *FieldLocation)
+
+	// MoreLocations reports if there are more FieldLocations that this
+	// LocationProvider can give.
 	MoreLocations() bool
+
+	// MinimumBounds defines the minumum bounds of the field for which
+	// a LocationProvider gives FieldLocations.
+	MinimumBounds() (width, height int)
 }
 
 type Seeder struct {
@@ -97,6 +104,10 @@ func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
 
 func (r RandomLocationProvider) MoreLocations() bool {
 	return r.i < r.width*r.height/4
+}
+
+func (r RandomLocationProvider) MinimumBounds() (width, height int) {
+	return r.width, r.height
 }
 
 // Field represents a two-dimensional field of cells.
@@ -253,12 +264,25 @@ func initStartGen() {
 	}
 }
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 // initSeed initializes the Seeder and seed-related vars
 func initSeed() {
 	// -f option
 	if initPath != "" {
-		seeder = NewSeeder(NewFileLocationProvider(initPath))
-		seedflag = "-f " + initPath
+		flp, err := NewFileLocationProvider(initPath)
+		if err == nil {
+			minX, minY := flp.MinimumBounds()
+			fieldWidth = max(fieldWidth, minX)
+			fieldHeight = max(fieldHeight, minY)
+			seeder = NewSeeder(flp)
+			seedflag = "-f " + initPath
+		}
 	}
 
 	// default / fallback

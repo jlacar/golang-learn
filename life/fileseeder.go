@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -23,8 +24,9 @@ import (
 //   line + 1
 
 type FileLocationProvider struct {
-	i    int
-	locs []FieldLocation
+	path             string
+	i, width, height int
+	locs             []FieldLocation
 }
 
 // NextLocation returns the next FieldLocation available from the receiving provider.
@@ -39,29 +41,51 @@ func (f *FileLocationProvider) MoreLocations() bool {
 	return f.i < len(f.locs)
 }
 
+func (f *FileLocationProvider) MinimumBounds() (width, height int) {
+	return f.width, f.height
+}
+
+func (f *FileLocationProvider) String() string {
+	return fmt.Sprintf("FileLocationProvider: file: %v minX: %v, minY: %v", f.path, f.width, f.height)
+}
+
 // NewFileLocationProvider creates a FileLocationProvider with the given
 // height and width and reads a field configuration from the file
 // specified by path.
-func NewFileLocationProvider(path string) *FileLocationProvider {
+func NewFileLocationProvider(path string) (*FileLocationProvider, error) {
 	lines, err := readLines(path)
+
 	if err != nil {
-		log.Printf("Could not read file [%v]: %v", path, err.Error())
-		return nil
+		log.Println(err.Error())
+		return nil, fmt.Errorf("Could not read file [%v]", path)
 	}
+
 	if len(lines) == 0 {
-		log.Printf("File [%v] is empty", path)
-		return nil
+		return nil, fmt.Errorf("File [%v] is empty", path)
 	}
+
 	locs := []FieldLocation{}
-	row := -1
+	var minX, minY int
 	for _, l := range lines {
-		morelocs, lastRow := parseConfigLine(l, row)
-		row = lastRow
+		morelocs, lastRow := parseConfigLine(l, minY)
+		minY = lastRow
 		if len(morelocs) != 0 {
 			locs = append(locs, morelocs...)
 		}
+		minX = maxCol(minX, locs)
 	}
-	return &FileLocationProvider{locs: locs}
+
+	return &FileLocationProvider{path: path, locs: locs, width: minX + 1, height: minY + 1}, nil
+}
+
+func maxCol(x int, locs []FieldLocation) (max int) {
+	max = x
+	for _, l := range locs {
+		if l.X > max {
+			max = l.X
+		}
+	}
+	return
 }
 
 // ignorable checks if the given configuration line can be ignored for parsing
