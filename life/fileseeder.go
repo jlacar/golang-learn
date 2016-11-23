@@ -11,36 +11,27 @@ import (
 )
 
 // FileLocationProvider is a LocationProvider implementation that
-// reads a text file and parses it for live cell locations. The
-// text file format expected is as follows:
-// - A line that starts with "#" or does not contain at least one ":"
-//   is ignored as a comment
-// - A line that starts with ">>:" is interpreted as a column offset
-//   setting. A number greater than or equal to 0 must be specified
-//   after the ":" and sets the column offset for converting relative
-//   column numbers to absolute for all subsequent lines parsed
-// - A line that starts with "NN:" is assigned that number as its row
-// - A line that starts with "++:" is assigned the row number of the previous
-//   line + 1
-
+// uses a field definition file as the source for live cell locations.
 type FileLocationProvider struct {
 	path             string
 	i, width, height int
 	locs             []FieldLocation
 }
 
-// NextLocation returns the next FieldLocation available from the receiving provider.
+// NextLocation returns the next FieldLocation read from the file
 func (f *FileLocationProvider) NextLocation() (loc *FieldLocation) {
 	loc = &f.locs[f.i]
 	f.i++
 	return
 }
 
-// MoreLocations returns true if there are more FieldLocations available from the receiving provider.
+// MoreLocations returns true if there are more FieldLocations available
 func (f *FileLocationProvider) MoreLocations() bool {
 	return f.i < len(f.locs)
 }
 
+// MinimumBounds reports the minumum width and height of a field that
+// can accomodate all the FieldLocations that will be provided.
 func (f *FileLocationProvider) MinimumBounds() (width, height int) {
 	return f.width, f.height
 }
@@ -49,9 +40,8 @@ func (f *FileLocationProvider) String() string {
 	return fmt.Sprintf("FileLocationProvider: file: %v minX: %v, minY: %v", f.path, f.width, f.height)
 }
 
-// NewFileLocationProvider creates a FileLocationProvider with the given
-// height and width and reads a field configuration from the file
-// specified by path.
+// NewFileLocationProvider creates a FileLocationProvider that gets its
+// its FieldLocations from the field definition file specified by path.
 func NewFileLocationProvider(path string) (*FileLocationProvider, error) {
 	lines, err := readLines(path)
 
