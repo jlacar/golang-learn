@@ -56,12 +56,14 @@ func NewFileLocationProvider(path string) (*FileLocationProvider, error) {
 
 	locs := []FieldLocation{}
 	var minX, minY int
+	row := 0
 	for _, l := range lines {
-		morelocs, lastRow := parseConfigLine(l, minY)
-		minY = lastRow
+		morelocs, lastrow := parseConfigLine(l, row)
+		row = lastrow
 		if len(morelocs) != 0 {
 			locs = append(locs, morelocs...)
 		}
+		minY = max(minY, row)
 		minX = maxCol(minX, locs)
 	}
 
