@@ -15,14 +15,14 @@ import (
 	"time"
 )
 
-// FieldLocation reifies the concept of a way of identifying where
-// a cell exists with a Field. It takes distinct data points,
-// usually row/column or x/y in a two-dimensional field, and
-// forces them into a single entity, i.e. "reifies" it.
+// FieldLocation reifies the concept of identifying where a cell exists
+// within a Field. This takes the distinct data points of row/column or
+// x/y and forces them into a single entity, i.e. "reifies" them.
 type FieldLocation struct {
 	X, Y int
 }
 
+// Creates a new FieldLocation for the given row and column coordinates.
 func NewFieldLocation(x, y int) *FieldLocation {
 	return &FieldLocation{X: x, Y: y}
 }
@@ -31,20 +31,21 @@ func (f FieldLocation) String() string {
 	return fmt.Sprintf("[row:%v, col:%v]", f.Y, f.X)
 }
 
-// LocationProvider defines functions of a provider of FieldLocations
+// LocationProvider defines what a provider of FieldLocations can do.
 type LocationProvider interface {
-	// NextLocation returns the next FieldLocation this provider has to give
+	// NextLocation returns the next FieldLocation a provider has to give.
 	NextLocation() (loc *FieldLocation)
 
-	// MoreLocations reports if there are more FieldLocations that this
-	// LocationProvider can give.
+	// MoreLocations reports if a provider has more FieldLocations to give out.
 	MoreLocations() bool
 
-	// MinimumBounds defines the minumum bounds of the field for which
-	// a LocationProvider gives FieldLocations.
+	// MinimumBounds defines the minumum dimensions of a field that will be
+	// able to accommodate all FieldLocations a provider can give.
 	MinimumBounds() (width, height int)
 }
 
+// Seeder wraps a LocationProvider and provides a template for their use
+// by the Life program.
 type Seeder struct {
 	provider LocationProvider
 }
@@ -53,6 +54,8 @@ func NewSeeder(lp LocationProvider) *Seeder {
 	return &Seeder{provider: lp}
 }
 
+// nextLocation is a template method that first ensures that the wrapped
+// LocationProvider has more locations to give.
 func (s Seeder) nextLocation() *FieldLocation {
 	s.assertMoreLocations()
 	return s.provider.NextLocation()
@@ -71,7 +74,7 @@ func (s Seeder) assertMoreLocations() {
 }
 
 var (
-	// provider of initial population locations
+	// Used to set up the initial Field population
 	seeder *Seeder
 
 	// flag option variables
@@ -86,26 +89,37 @@ var (
 	iconName    string
 )
 
-// RandomLocationProvider provides random FieldLocations that
-// fall within bounds of a field with a given width and height
+// RandomLocationProvider provides random FieldLocations.
 type RandomLocationProvider struct {
 	i             int
 	width, height int
 }
 
+// NewRandomLocationProvider creates a LocationProvider that gives
+// random locations within a Field with the given dimensions. The
+// number of locations provided will cover roughly a quarter of the
+// entire area of the Field.
 func NewRandomLocationProvider(w, h int) *RandomLocationProvider {
 	return &RandomLocationProvider{width: w, height: h}
 }
 
+// NextLocation gives the next random location. There is no guarantee
+// that the locations provided will be unique.
 func (r *RandomLocationProvider) NextLocation() (loc *FieldLocation) {
 	r.i++
 	return NewFieldLocation(rand.Intn(r.width), rand.Intn(r.height))
 }
 
+// MoreLocations reports whether a RandomLocationProvider has more locations
+// to give. Since there is no guarantee that locations provided are unique,
+// this implementation sets the upper bound to roughly a quarter of the entire
+// area of the Field covered by a RandomLocationProvider.
 func (r RandomLocationProvider) MoreLocations() bool {
 	return r.i < r.width*r.height/4
 }
 
+// MinimumBounds reports the minimum dimensions of a Field so that it
+// can accommodate any location that can be given by a RandomLocationProvider.
 func (r RandomLocationProvider) MinimumBounds() (width, height int) {
 	return r.width, r.height
 }
