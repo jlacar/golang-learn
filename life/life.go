@@ -56,18 +56,18 @@ func NewSeeder(lp LocationProvider) *Seeder {
 
 // nextLocation is a template method that first ensures that the wrapped
 // LocationProvider has more locations to give.
-func (s Seeder) nextLocation() *FieldLocation {
+func (s *Seeder) nextLocation() *FieldLocation {
 	s.assertMoreLocations()
 	return s.provider.NextLocation()
 }
 
-func (s Seeder) moreLocations() bool {
+func (s *Seeder) moreLocations() bool {
 	return s.provider.MoreLocations()
 }
 
 // assertMoreLocations enforces contract that LocationProvider.NextLocation()
 // can only be called when LocationProvider.MoreLocations() is true.
-func (s Seeder) assertMoreLocations() {
+func (s *Seeder) assertMoreLocations() {
 	if !s.provider.MoreLocations() {
 		log.Fatal("Illegal state: no more locations available")
 	}
