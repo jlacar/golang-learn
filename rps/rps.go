@@ -16,8 +16,16 @@ const (
 	PAPER
 	LIZARD
 	SCISSORS
-	LEN_Move int = iota
+	LAST_Move
 )
+
+var moveNames = []string{
+	"Rock",
+	"Spock",
+	"Paper",
+	"Lizard",
+	"Scissors",
+}
 
 type MatchUp struct {
 	p1, p2 Move
@@ -66,14 +74,18 @@ func (m *MatchUp) LoseResult() string {
 }
 
 func (m Move) String() string {
-	var names = []string{
-		"Rock",
-		"Spock",
-		"Paper",
-		"Lizard",
-		"Scissors",
+	if m.InRange() {
+		return moveNames[m]
 	}
-	return names[m]
+	return ""
+}
+
+func (m Move) NotLast() bool {
+	return m < LAST_Move
+}
+
+func (m Move) InRange() bool {
+	return m >= 0 && m.NotLast()
 }
 
 func (m1 Move) Versus(m2 Move) string {
@@ -88,12 +100,12 @@ func (m1 Move) Versus(m2 Move) string {
 }
 
 func (m1 Move) Beats(m2 Move) bool {
-	return m1 != m2 && (int(m1-m2)+LEN_Move)%LEN_Move <= 2
+	return m1 != m2 && (m1-m2+LAST_Move)%LAST_Move <= 2
 }
 
 func findMatchUp(p1, p2 Move) (*MatchUp, error) {
 	if p1 == p2 {
-		return &MatchUp{p1, p2, "ties", ""}, nil
+		return &MatchUp{p1: p1, p2: p2, w: "ties"}, nil
 	}
 	for _, m := range pairings {
 		if m.p1 == p1 && m.p2 == p2 || m.p1 == p2 && m.p2 == p1 {
@@ -104,27 +116,26 @@ func findMatchUp(p1, p2 Move) (*MatchUp, error) {
 }
 
 func randomMove() Move {
-	return Move(rand.Intn(LEN_Move))
+	return Move(rand.Intn(int(LAST_Move)))
 }
 
 func random10matches() {
 	for i := 0; i < 10; i++ {
-		p1, p2 := randomMove(), randomMove()
-		fmt.Println(p1.Versus(p2))
+		fmt.Println(randomMove().Versus(randomMove()))
 	}
 }
 
 func showAllMatchUps() {
-	for p1 := ROCK; int(p1) < LEN_Move; p1++ {
-		for p2 := ROCK; int(p2) < LEN_Move; p2++ {
+	for p1 := Move(0); p1.NotLast(); p1++ {
+		for p2 := Move(0); p2.NotLast(); p2++ {
 			fmt.Println(p1.Versus(p2))
 		}
 	}
 }
 
 func showWinningMatchUps() {
-	for p1 := ROCK; int(p1) < LEN_Move; p1++ {
-		for p2 := p1 + 1; int(p2) < LEN_Move; p2++ {
+	for p1 := Move(0); p1.NotLast(); p1++ {
+		for p2 := p1 + 1; p2.NotLast(); p2++ {
 			if p1.Beats(p2) {
 				fmt.Println(p1.Versus(p2))
 			} else if p2.Beats(p1) {
@@ -135,11 +146,11 @@ func showWinningMatchUps() {
 }
 
 func SheldonExplains() {
-	for i, m := range pairings {
+	for i, vs := range pairings {
 		if i == len(pairings)-1 {
 			fmt.Print("...and as it always has, ")
 		}
-		fmt.Println(m.WinResult())
+		fmt.Println(vs.WinResult())
 	}
 }
 
